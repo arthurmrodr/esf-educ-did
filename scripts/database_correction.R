@@ -41,4 +41,4 @@ db_final <- db_final %>% mutate(ano_instalacao = ifelse(COD_Equipe != 0 & is.na(
 
 # Criando arquivo RDS com a base nova
 
-saveRDS(db_final, file = "data/RDS/db_areasmapa_corr.RDS")
+saveRDS(db_final, file = "data/RDS/db_escolasf_corr.RDS")
