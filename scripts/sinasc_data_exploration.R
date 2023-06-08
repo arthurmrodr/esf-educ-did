@@ -64,7 +64,8 @@ desc_sinasc <- db_microdatasus %>% group_by(CODBAIRES) %>% summarise(PESO = mean
                                                                      PRENATAL = mean(CONSULTAS_NUM, na.rm = T),
                                                                      APGAR1 = mean(APGAR1, na.rm = T),
                                                                      APGAR5 = mean(APGAR5, na.rm = T),
-                                                                     NUM = n())
+                                                                     NUM = n(),
+                                                                     PCT_ZEROCONSULTAS = sum(CONSULTAS == "Nenhuma", na.rm = T) / n())
 
 #### Mapas ####
 
@@ -76,36 +77,36 @@ sf_sinasc <- sf_sinasc %>% mutate(log_peso = log(PESO))
 
 #Pre natal
 ggplot() + geom_sf(data = sf_sinasc, alpha = 0.5, size = 0.1)+
-  geom_sf(data = sf_sinasc, aes(fill = PRENATAL), size=0.1, alpha=0.9, color = "white")+
-  viridis::scale_fill_viridis(option = "viridis", name = "Average number of prenatal appointments")+
+  geom_sf(data = sf_sinasc, aes(fill = PCT_ZEROCONSULTAS), size=0.1, alpha=0.9, color = "white")+
+  viridis::scale_fill_viridis(option = "viridis", name = "Share of births with zero prenatal appointments", direction = -1)+
   coord_sf()+
   theme_map()+
   theme(legend.position = "bottom")
 
 
-# Peso (log)
+# Peso
 ggplot() + geom_sf(data = sf_sinasc, alpha = 0.5, size = 0.1)+
-  geom_sf(data = sf_sinasc, aes(fill = log_peso), size=0.1, alpha=0.9, color = "white")+
-  viridis::scale_fill_viridis(option = "viridis", name = "Average weight (log)")+
+  geom_sf(data = sf_sinasc, aes(fill = PESO/1000), size=0.1, alpha=0.9, color = "white")+
+  viridis::scale_fill_viridis(option = "viridis", name = "Average weight (kgs)")+
   coord_sf()+
   theme_map()+
   theme(legend.position = "bottom")
 
 #APGAR 1 minutos
-ggplot() + geom_sf(data = sf_sinasc, alpha = 0.5, size = 0.1)+
-  geom_sf(data = sf_sinasc, aes(fill = APGAR1), size=0.1, alpha=0.9, color = "white")+
-  viridis::scale_fill_viridis(option = "viridis", name = "APGAR Score 1 minute after birth")+
-  coord_sf()+
-  theme_map()+
-  theme(legend.position = "bottom")
+#ggplot() + geom_sf(data = sf_sinasc, alpha = 0.5, size = 0.1)+
+#  geom_sf(data = sf_sinasc, aes(fill = APGAR1), size=0.1, alpha=0.9, color = "white")+
+#  viridis::scale_fill_viridis(option = "viridis", name = "APGAR Score 1 minute after birth")+
+#  coord_sf()+
+#  theme_map()+
+#  theme(legend.position = "bottom")
 
 #APGAR 5 minutos
-ggplot() + geom_sf(data = sf_sinasc, alpha = 0.5, size = 0.1)+
-  geom_sf(data = sf_sinasc, aes(fill = APGAR5), size=0.1, alpha=0.9, color = "white")+
-  viridis::scale_fill_viridis(option = "viridis", name = "APGAR Score 5 minutes after birth")+
-  coord_sf()+
-  theme_map()+
-  theme(legend.position = "bottom")
+#ggplot() + geom_sf(data = sf_sinasc, alpha = 0.5, size = 0.1)+
+#  geom_sf(data = sf_sinasc, aes(fill = APGAR5), size=0.1, alpha=0.9, color = "white")+
+#  viridis::scale_fill_viridis(option = "viridis", name = "APGAR Score 5 minutes after birth")+
+#  coord_sf()+
+#  theme_map()+
+#  theme(legend.position = "bottom")
 
 #### Tabelas ####
 
@@ -116,12 +117,12 @@ table1::label(sf_sinasc$APGAR5) <- "APGAR 5 minutes"
 table1(~PRENATAL + ~APGAR1 + ~APGAR5, data = sf_sinasc) #tabela bairros
 
 db_tabela <- db_microdatasus %>% filter(!is.na(CODBAIRES))
+db_tabela <- db_tabela %>% mutate(ZERO_CONSULTAS = ifelse(CONSULTAS == "Nenhuma", 1, 0))
 
-table1::label(db_tabela$CONSULTAS_NUM) <- "Number of prenatal appointments"
-table1::label(db_tabela$APGAR1) <- "APGAR 1 minute"
-table1::label(db_tabela$APGAR5) <- "APGAR 5 minutes"
+table1::label(db_tabela$ZERO_CONSULTAS) <- "Zero prenatal appointments"
+table1::label(db_tabela$PESO) <- "Weight (grams)"
 
-table1(~CONSULTAS_NUM + ~APGAR1 + ~APGAR5, data = db_tabela) #tabela nascimentos
+table1(~ZERO_CONSULTAS + ~PESO, data = db_tabela) #tabela nascimentos
 
 #### Join espacial bairros x equipes ####
 

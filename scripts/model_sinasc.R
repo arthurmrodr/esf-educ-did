@@ -51,9 +51,9 @@ summary(regapgar5)
 regapgar5trim <- lm( APGAR5 ~ trat_grav + trat_segtri + trat_tertri + as.character(ANOGRAVIDEZ), data = db_reg)
 summary(regapgar5trim)
 
-#### Regressoes filtro mães solteiras####
+#### Regressoes filtro mães pretas e pardas####
 
-db_microsolo <- db_reg %>% filter(ESTCIVMAE == "Solteira")
+db_microsolo <- db_reg %>% filter(RACACOR != "Branca")
 
 # PESO
 
